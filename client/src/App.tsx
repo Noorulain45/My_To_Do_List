@@ -16,7 +16,7 @@ interface ApiResponse<T> {
 }
 
 // ── API base URL ──
-const API = 'https://server-9u2bt5vej-noorulain45s-projects.vercel.app/api/tasks'
+const API = 'https://server-3rrlzgnz1-noorulain45s-projects.vercel.app/api/tasks'
 
 // ── API helper functions ──
 const api = {
