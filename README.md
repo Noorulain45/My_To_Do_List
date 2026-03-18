@@ -23,42 +23,6 @@ The repository is organized into two main directories:
 * **Responsive Design:** optimized for mobile, tablet, and desktop viewports.
 * **Type Safety:** Robust TypeScript implementation across both frontend and backend for reliable code.
 
----
 
-## Installation & Setup
-
-1. Clone the repository:
-
-   ```bash
-   git clone [https://github.com/Bisma8090/Week04Task01.git]
-   ```
-
-2. Navigate to the project directory:
-
-   ```bash
-   cd Week04Task01
-   ```
-
-3. Install the required dependencies:
-
-   ```bash
-   npm install
-   ```
-
-4. Start the application:
-
-   ```bash
-   npm start 
-   ```
-   or
-    ```bash
-   npm run dev 
-   ```
-
-5. Server will start at:
-
-    ```bash
-   http://localhost:5000
-   ```
 
 
