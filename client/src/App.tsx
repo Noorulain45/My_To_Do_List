@@ -1,30 +1,22 @@
 import { useState, useEffect, type KeyboardEvent } from 'react'
 import './App.css'
 
-// ── TypeScript types (mirrors backend types.ts) ──────────────────────────────
+// ── TypeScript types ──────────────────────────────────────────────
 interface Task {
-  id: number
+  id: string
   title: string
   isCompleted: boolean
-  createdAt: string
-}
-
-interface ApiResponse<T> {
-  success: boolean
-  data?: T
-  error?: string
 }
 
 // ── API base URL ──
-const API = 'https://server-3rrlzgnz1-noorulain45s-projects.vercel.app/api/tasks'
+const API = 'https://server-id8x1bfua-noorulain45s-projects.vercel.app/api'
 
 // ── API helper functions ──
 const api = {
   async getAll(): Promise<Task[]> {
     const res = await fetch(API)
-    const json: ApiResponse<Task[]> = await res.json()
-    if (!json.success || !json.data) throw new Error(json.error || 'Failed to load tasks')
-    return json.data
+    if (!res.ok) throw new Error('Failed to fetch tasks')
+    return await res.json()
   },
 
   async create(title: string): Promise<Task> {
@@ -33,38 +25,35 @@ const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ title }),
     })
-    const json: ApiResponse<Task> = await res.json()
-    if (!json.success || !json.data) throw new Error(json.error || 'Failed to create task')
-    return json.data
+    if (!res.ok) throw new Error('Failed to create task')
+    return await res.json()
   },
 
-  async toggle(id: number, isCompleted: boolean): Promise<Task> {
+  async toggle(id: string, isCompleted: boolean): Promise<Task> {
     const res = await fetch(`${API}/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ isCompleted }),
     })
-    const json: ApiResponse<Task> = await res.json()
-    if (!json.success || !json.data) throw new Error(json.error || 'Failed to update task')
-    return json.data
+    if (!res.ok) throw new Error('Failed to update task')
+    return await res.json()
   },
 
-  async delete(id: number): Promise<void> {
+  async delete(id: string): Promise<void> {
     const res = await fetch(`${API}/${id}`, { method: 'DELETE' })
-    const json: ApiResponse<null> = await res.json()
-    if (!json.success) throw new Error(json.error || 'Failed to delete task')
+    if (!res.ok) throw new Error('Failed to delete task')
   },
 }
 
-// ── Component ────────────────────────────────────────────────────────────────
+// ── Component ─────────────────────────────────────────────────────
 function App() {
   const [tasks, setTasks] = useState<Task[]>([])
-  const [inputValue, setInputValue] = useState<string>('')
-  const [error, setError] = useState<string>('')
-  const [loading, setLoading] = useState<boolean>(true)
-  const [apiError, setApiError] = useState<string>('')
+  const [inputValue, setInputValue] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [apiError, setApiError] = useState('')
 
-  // Load tasks on mount
+  // Load tasks
   useEffect(() => {
     api.getAll()
       .then(setTasks)
@@ -77,7 +66,7 @@ function App() {
     setTimeout(() => setError(''), 2500)
   }
 
-  // POST /api/tasks
+  // ➕ Add task
   const addTask = async () => {
     if (!inputValue.trim()) {
       showInputError('✿ task title is required')
@@ -88,24 +77,25 @@ function App() {
       const newTask = await api.create(inputValue.trim())
       setTasks((prev) => [...prev, newTask])
       setInputValue('')
-      setError('')
     } catch (err: unknown) {
       showInputError((err as Error).message)
     }
   }
 
-  // PUT /api/tasks/:id
-  const toggleTask = async (id: number, current: boolean) => {
+  // 🔄 Toggle task
+  const toggleTask = async (id: string, current: boolean) => {
     try {
       const updated = await api.toggle(id, !current)
-      setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)))
+      setTasks((prev) =>
+        prev.map((t) => (t.id === id ? updated : t))
+      )
     } catch (err: unknown) {
       setApiError((err as Error).message)
     }
   }
 
-  // DELETE /api/tasks/:id
-  const deleteTask = async (id: number) => {
+  // ❌ Delete task
+  const deleteTask = async (id: string) => {
     try {
       await api.delete(id)
       setTasks((prev) => prev.filter((t) => t.id !== id))
@@ -135,7 +125,7 @@ function App() {
         </div>
       )}
 
-      {/* Stats Bar */}
+      {/* Stats */}
       <div className="stats-bar">
         <div className="stat">
           <span className="stat-num">{totalTasks}</span>
@@ -151,7 +141,7 @@ function App() {
         </div>
       </div>
 
-      {/* Input Row */}
+      {/* Input */}
       <div className="input-row">
         <input
           className={`task-input ${error ? 'input-error' : ''}`}
@@ -182,11 +172,11 @@ function App() {
           ) : (
             tasks.map((task) => (
               <li key={task.id} className={`task-item ${task.isCompleted ? 'done' : ''}`}>
-                {/* Toggle complete */}
+                
+                {/* Toggle */}
                 <button
                   className={`check-btn ${task.isCompleted ? 'checked' : ''}`}
                   onClick={() => toggleTask(task.id, task.isCompleted)}
-                  aria-label="Toggle complete"
                 >
                   {task.isCompleted && (
                     <svg className="checkmark" viewBox="0 0 11 11" fill="none">
@@ -208,7 +198,6 @@ function App() {
                 <button
                   className="del-btn"
                   onClick={() => deleteTask(task.id)}
-                  aria-label="Delete task"
                 >
                   ×
                 </button>

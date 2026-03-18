@@ -4,8 +4,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { Task, UpdateTaskDto } from './types';
 
 const app = express();
-app.use(cors());
-app.use(express.json());
+app.use(cors({
+  origin: '*' 
+}));app.use(express.json());
 
 // In-memory Database
 let tasks: Task[] = [
